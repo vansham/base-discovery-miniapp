@@ -7,9 +7,7 @@ export default function Home() {
 
   async function fetchPairs() {
     try {
-      const res = await fetch(
-        "https://api.dexscreener.com/latest/dex/search?q=base"
-      );
+      const res = await fetch("/api/dex");
       const data = await res.json();
 
       setPairs(data.pairs?.slice(0, 10) || []);
@@ -30,6 +28,10 @@ export default function Home() {
 
       {loading && <p>Loading Base DEX data...</p>}
 
+      {!loading && pairs.length === 0 && (
+        <p>No data found (check API proxy)</p>
+      )}
+
       <div className="grid gap-4">
         {pairs.map((p, i) => (
           <div key={i} className="bg-zinc-900 p-4 rounded-xl">
@@ -38,8 +40,13 @@ export default function Home() {
             </p>
 
             <p>DEX: {p.dexId}</p>
-            <p>Liquidity: ${p.liquidity?.usd?.toLocaleString()}</p>
-            <p>Price: ${p.priceUsd}</p>
+            <p>
+              Liquidity: $
+              {p.liquidity?.usd
+                ? Number(p.liquidity.usd).toLocaleString()
+                : "N/A"}
+            </p>
+            <p>Price: ${p.priceUsd || "N/A"}</p>
           </div>
         ))}
       </div>
