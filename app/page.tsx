@@ -7,13 +7,11 @@ export default function Home() {
 
   async function fetchPairs() {
     try {
-      // Base chain pairs from Dexscreener
       const res = await fetch(
-        "https://api.dexscreener.com/latest/dex/pairs/base"
+        "https://api.dexscreener.com/latest/dex/search?q=base"
       );
       const data = await res.json();
 
-      // show top 10 recent
       setPairs(data.pairs?.slice(0, 10) || []);
     } catch (e) {
       console.error(e);
@@ -30,7 +28,7 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white p-10">
       <h1 className="text-4xl font-bold mb-6">Base New Liquidity</h1>
 
-      {loading && <p>Loading real Base DEX data...</p>}
+      {loading && <p>Loading Base DEX data...</p>}
 
       <div className="grid gap-4">
         {pairs.map((p, i) => (
