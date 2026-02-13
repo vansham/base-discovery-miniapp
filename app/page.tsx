@@ -3,20 +3,25 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [pairs, setPairs] = useState<any[]>([]);
+  const [newPools, setNewPools] = useState<any[]>([]);
   const [whales, setWhales] = useState<any[]>([]);
   const [wallet, setWallet] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function fetchAll() {
-    setLoading(true);
+async function fetchAll() {
+  setLoading(true);
 
-    const p = await fetch("/api/dex").then(r => r.json());
-    const w = await fetch("/api/smart").then(r => r.json());
+  const p = await fetch("/api/dex").then(r => r.json());
+  const w = await fetch("/api/smart").then(r => r.json());
+  const n = await fetch("/api/newpools").then(r => r.json());
 
-    setPairs(p.pairs || []);
-    setWhales(w.whales || []);
-    setLoading(false);
-  }
+  setPairs(p.pairs || []);
+  setWhales(w.whales || []);
+  setNewPools(n.newPools || []);
+
+  setLoading(false);
+}
+
 
   async function connectWallet() {
     try {
@@ -64,6 +69,20 @@ export default function Home() {
       )}
 
       {/* SMART SIGNALS */}
+<Section title="🔥 New Pools (Early Alpha)">
+  <div className="grid md:grid-cols-2 gap-4">
+    {newPools.map((p,i)=>(
+      <Card
+        key={i}
+        pair={`${p.baseToken?.symbol}/${p.quoteToken?.symbol}`}
+        liq={p.liquidity?.usd}
+        dex={p.dexId}
+        price={p.priceUsd}
+      />
+    ))}
+  </div>
+</Section>
+
       <Section title="Smart Liquidity Signals">
         <div className="grid md:grid-cols-2 gap-4">
           {whales.map((w,i)=>(
