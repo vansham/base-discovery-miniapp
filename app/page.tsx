@@ -78,6 +78,8 @@ async function fetchAll() {
         liq={p.liquidity?.usd}
         dex={p.dexId}
         price={p.priceUsd}
+        createdAt={p.pairCreatedAt}
+
       />
     ))}
   </div>
@@ -118,8 +120,16 @@ function Section({title, children}: any) {
     </div>
   );
 }
+function Card({pair, liq, dex, price, createdAt}: any) {
 
-function Card({pair, liq, dex, price}: any) {
+  function getAge() {
+    if (!createdAt) return "";
+    const mins = Math.floor((Date.now() - createdAt) / 60000);
+    if (mins < 60) return mins + " mins ago";
+    const hrs = Math.floor(mins / 60);
+    return hrs + " hrs ago";
+  }
+
   return (
     <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 hover:border-blue-500 transition">
       <div className="text-lg font-bold">{pair}</div>
@@ -128,9 +138,15 @@ function Card({pair, liq, dex, price}: any) {
         Liquidity: ${Number(liq||0).toLocaleString()}
       </div>
       {price && <div className="text-sm text-zinc-400">Price: ${price}</div>}
+      {createdAt && (
+        <div className="text-xs text-yellow-400 mt-1">
+          Age: {getAge()}
+        </div>
+      )}
     </div>
   );
 }
+
 
 function Stat({label, value}: any) {
   return (
