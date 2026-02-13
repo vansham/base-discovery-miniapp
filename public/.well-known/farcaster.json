@@ -1,0 +1,15 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "1",
+    "name": "Base Alpha Discovery",
+    "iconUrl": "https://base-discovery-miniapp.vercel.app/icon.png",
+    "homeUrl": "https://base-discovery-miniapp.vercel.app",
+    "imageUrl": "https://base-discovery-miniapp.vercel.app/og.png",
+    "buttonTitle": "Open App"
+  }
+}
