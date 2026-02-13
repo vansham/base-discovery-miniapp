@@ -7,13 +7,13 @@ export async function GET() {
 
     const data = await res.json();
 
-    const pairs =
-      data.pairs?.filter(
-        (p: any) => (p?.liquidity?.usd || 0) > 5000
-      ) || [];
+    const whales =
+      data.pairs
+        ?.filter((p: any) => (p?.liquidity?.usd || 0) > 50000)
+        ?.slice(0, 5) || [];
 
-    return Response.json({ pairs });
+    return Response.json({ whales });
   } catch {
-    return Response.json({ pairs: [] });
+    return Response.json({ whales: [] });
   }
 }
