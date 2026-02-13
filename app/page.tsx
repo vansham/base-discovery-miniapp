@@ -1,7 +1,13 @@
-"use client";
-import { useEffect, useState } from "react";
+"use client"
+
+import { useEffect } from "react"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 export default function Home() {
+  useEffect(() => {
+    sdk.actions.ready()
+  }, [])
+  
   const [pairs, setPairs] = useState<any[]>([]);
   const [newPools, setNewPools] = useState<any[]>([]);
   const [whales, setWhales] = useState<any[]>([]);
