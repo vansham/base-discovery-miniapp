@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { sdk } from "@farcaster/miniapp-sdk"
+import { parseEther } from "viem"
 
 export default function Home() {
 
@@ -23,8 +24,8 @@ export default function Home() {
   const [whales, setWhales] = useState<any[]>([])
   const [wallet, setWallet] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sendingTx, setSendingTx] = useState(false)
 
-  /* FETCH DATA */
   async function fetchAll() {
     try {
       setLoading(true)
@@ -44,11 +45,9 @@ export default function Home() {
     }
   }
 
-  /* WALLET CONNECT */
   async function connectWallet() {
     try {
-      // @ts-ignore
-      const accounts = await window.ethereum.request({
+      const accounts = await (window as any).ethereum.request({
         method: "eth_requestAccounts"
       })
       setWallet(accounts[0])
@@ -57,7 +56,51 @@ export default function Home() {
     }
   }
 
-  /* AUTO REFRESH */
+  /* 🔥 BUILDER ATTRIBUTION TX */
+  async function sendTestTx() {
+    try {
+      if (!wallet) {
+        alert("Connect wallet first")
+        return
+      }
+
+      setSendingTx(true)
+
+      const builderCode = "bc_cpho8un9"
+      const hexBuilder =
+        "0x" +
+        Array.from(new TextEncoder().encode(builderCode))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("")
+
+      await (window as any).ethereum.request({
+        method: "wallet_sendCalls",
+        params: [{
+          calls: [
+            {
+              to: wallet,
+              value: "0x" + (Number(parseEther("0.000001"))).toString(16),
+            }
+          ],
+          capabilities: {
+            dataSuffix: {
+              value: hexBuilder,
+              optional: true
+            }
+          }
+        }]
+      })
+
+      alert("✅ Tx sent with builder attribution!")
+
+    } catch (e) {
+      console.error(e)
+      alert("❌ Transaction failed")
+    } finally {
+      setSendingTx(false)
+    }
+  }
+
   useEffect(() => {
     fetchAll()
     const i = setInterval(fetchAll, 30000)
@@ -67,7 +110,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white">
 
-      {/* HEADER */}
       <div className="flex justify-between items-center p-6 border-b border-zinc-800">
         <div>
           <h1 className="text-3xl font-bold">Base Alpha Discovery</h1>
@@ -76,15 +118,23 @@ export default function Home() {
           </p>
         </div>
 
-        <button
-          onClick={connectWallet}
-          className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
-        >
-          {wallet ? wallet.slice(0,6)+"..." : "Connect Base Wallet"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={connectWallet}
+            className="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-lg"
+          >
+            {wallet ? wallet.slice(0,6)+"..." : "Connect Base Wallet"}
+          </button>
+
+          <button
+            onClick={sendTestTx}
+            className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg"
+          >
+            {sendingTx ? "Sending..." : "🚀 Test Base Tx"}
+          </button>
+        </div>
       </div>
 
-      {/* STATS */}
       <div className="grid grid-cols-3 gap-4 p-6">
         <Stat label="Smart Signals" value={whales.length} />
         <Stat label="Pools Showing" value={pairs.length} />
@@ -97,7 +147,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* NEW POOLS */}
       <Section title="🔥 New Pools (Early Alpha)">
         <div className="grid md:grid-cols-2 gap-4">
           {newPools.map((p,i)=>(
@@ -113,7 +162,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* SMART SIGNALS */}
       <Section title="Smart Liquidity Signals">
         <div className="grid md:grid-cols-2 gap-4">
           {whales.map((w,i)=>(
@@ -126,7 +174,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* HIGH LIQ POOLS */}
       <Section title="High Liquidity Base Pools">
         <div className="grid md:grid-cols-2 gap-4">
           {pairs.map((p,i)=>(
@@ -145,7 +192,6 @@ export default function Home() {
   )
 }
 
-/* SECTION */
 function Section({title, children}: any) {
   return (
     <div className="px-6 pb-6">
@@ -155,9 +201,7 @@ function Section({title, children}: any) {
   )
 }
 
-/* CARD */
 function Card({pair, liq, dex, price, createdAt}: any) {
-
   function getAge() {
     if (!createdAt) return ""
     const mins = Math.floor((Date.now() - createdAt) / 60000)
@@ -187,7 +231,6 @@ function Card({pair, liq, dex, price, createdAt}: any) {
   )
 }
 
-/* STAT */
 function Stat({label, value}: any) {
   return (
     <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800">
