@@ -56,7 +56,7 @@ export default function Home() {
     }
   }
 
-  /* 🔥 BUILDER ATTRIBUTION TX */
+  /* 🔥 SAFE BUILDER TX (WITH FALLBACK) */
   async function sendTestTx() {
     try {
       if (!wallet) {
@@ -66,6 +66,8 @@ export default function Home() {
 
       setSendingTx(true)
 
+      const eth = (window as any).ethereum
+
       const builderCode = "bc_cpho8un9"
       const hexBuilder =
         "0x" +
@@ -73,25 +75,41 @@ export default function Home() {
           .map(b => b.toString(16).padStart(2, "0"))
           .join("")
 
-      await (window as any).ethereum.request({
-        method: "wallet_sendCalls",
-        params: [{
-          calls: [
-            {
-              to: wallet,
-              value: "0x" + (Number(parseEther("0.000001"))).toString(16),
-            }
-          ],
-          capabilities: {
-            dataSuffix: {
-              value: hexBuilder,
-              optional: true
-            }
-          }
-        }]
-      })
+      const valueHex =
+        "0x" + Number(parseEther("0.000001")).toString(16)
 
-      alert("✅ Tx sent with builder attribution!")
+      try {
+        // 🚀 TRY MODERN METHOD
+        await eth.request({
+          method: "wallet_sendCalls",
+          params: [{
+            calls: [{ to: wallet, value: valueHex }],
+            capabilities: {
+              dataSuffix: {
+                value: hexBuilder,
+                optional: true
+              }
+            }
+          }]
+        })
+
+        alert("✅ Tx sent with attribution!")
+
+      } catch (err) {
+        console.log("sendCalls failed → using fallback")
+
+        // ✅ FALLBACK (ALWAYS WORKS)
+        await eth.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: wallet,
+            to: wallet,
+            value: valueHex,
+          }]
+        })
+
+        alert("✅ Tx sent (fallback mode)")
+      }
 
     } catch (e) {
       console.error(e)
